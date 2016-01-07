@@ -8,14 +8,21 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 /**
- * Created by pm on 12/17/15.
+ * Only valid results stored here;
+ *
+ * Enough info to store temporary result
  */
-
 @Data
 @Entity
-public class Ttt {
+public class Result {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer tttid;
-    String txt;
+    Integer resultid;
+    Integer catid;
+    Integer engineid;
+    Integer dataid;
+
+    String filename;
+
 }
+

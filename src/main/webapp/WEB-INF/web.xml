@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
 	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
-	<display-name>Wzorzec aplikacji Web</display-name>
+	<display-name>Tester for engines working on data (via protobuf)</display-name>
 
     <servlet>
 		<servlet-name>mdispatcher</servlet-name>
@@ -16,7 +16,6 @@
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
-    <!-- CORS; inaczej angular nie chce akceptować odpowiedzi-->
     <filter>
         <filter-name>cors</filter-name>
         <filter-class>WebController.SimpleCORSFilter</filter-class>
@@ -26,6 +25,7 @@
         <filter-name>cors</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+
 
 
 

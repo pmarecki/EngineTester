@@ -15,8 +15,6 @@
 
     <context:component-scan base-package="WebController, Domain"/>
 
-    <!-- Beany są definiowane tutaj; odpowiednik spring-context.xml,
-            ładowanego przez ClassPathXmlApplicationContext-->
 
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/WEB-INF/pages/"/>
@@ -28,20 +26,37 @@
     <mvc:annotation-driven />
 
     <!--JPA -->
-    <!-- Tworzy Beany dla interfejsów typu CrudRepository -->
-    <jpa:repositories base-package="Domain"
-                      entity-manager-factory-ref="entityManagerFactory0">
-    </jpa:repositories>
 
-    <!-- Bean dający EntityManager-a dla PersistenceUnit=student (w resources/META-INF/persistence.xml-->
     <bean id="entityManagerFactory0"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="persistenceUnitName" value="enginetester" />
     </bean>
 
-    <!-- Transakcyjność... -->
+    <!-- Tworzy Beany dla interfejsów typu CrudRepository -->
+    <jpa:repositories base-package="Domain" entity-manager-factory-ref="entityManagerFactory0">
+    </jpa:repositories>
+
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
         <property name="entityManagerFactory" ref="entityManagerFactory0" />
     </bean>
+
+
+
+    <!--Multithreading-->
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="8" />
+        <property name="maxPoolSize" value="16" />
+        <property name="queueCapacity" value="125"/>
+        <property name="waitForTasksToCompleteOnShutdown" value="true"/>
+        <property name="awaitTerminationSeconds" value="5"/>
+    </bean>
+
+    <!--Upload-->
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="50000000"/>
+        <!--50MB-->
+    </bean>
+
 
 </beans>

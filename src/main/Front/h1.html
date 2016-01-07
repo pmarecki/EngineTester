@@ -1,0 +1,250 @@
+<!doctype html>
+<html ng-app="myApp" ng-controller="mainCtrl" xmlns:ng-model="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Engine Tester</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" ></script>
+
+    <link href="h1.css" rel="stylesheet">
+    <script src="h1.js"></script>
+</head>
+<body >
+
+
+
+<div class="container-fluid" ng-controller="mainCtrl"  >
+
+    <div class="row" style="padding-top: 10px;" ng-controller="enginetest">
+        <div class="col-md-3">
+            <!--/////////////////////////////////////////////////////////////-->
+            <!--CATEGORY -->
+            <!--/////////////////////////////////////////////////////////////-->
+            <div class="boxed">
+                <p >Category:
+                    <select class="form-control" ng-model="M.selCat"
+                            ng-options="x.name for x in M.cats"></select>
+                </p>
+
+            </div>
+
+            <!--/////////////////////////////////////////////////////////////-->
+            <!--ENGINE-->
+            <!--/////////////////////////////////////////////////////////////-->
+            <div class="panel panel-primary">
+                <h3 class="panel-heading panel-title">  Engines </h3>
+                <div class="panel-body">
+                    <table class="table table-striped table-condensed">
+                        <thead>
+                        <tr><td> Id</td> <td>File</td><td></td></tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="e in M.engines"
+                            ng-click="e.isSelected=!e.isSelected"
+                            ng-class="(e.isSelected ? 'success' : 'default')"
+                            class="clickable"
+                        >
+                            <td> {{ e.engineid }}</td>
+                            <td> {{ e.filename }}</td>
+                            <td> <span class="glyphicon glyphicon-trash" ng-click="delEn(e)"></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <p>
+                        <button class="btn btn-primary" ng-click="loadEngines()"> Reload </button>
+                        <button type="button" class="btn btn-info" ng-click="M.upEn=!M.upEn; M.uFile=''">Upload</button>
+                    </p>
+
+                    <div class="boxed" ng-if="M.upEn">
+                        Name:
+                        <input ng-model="M.nFile" style="width:30%">
+                        <input type="file" id="fileEnUp" name="file"/>
+                        <button class="btn btn-primary" ng-click="uploadEngine()">Upload!</button>
+                    </div>
+
+
+                </div>
+            </div>
+
+            <!--/////////////////////////////////////////////////////////////-->
+            <!--DATASET-->
+            <!--/////////////////////////////////////////////////////////////-->
+            <div class="panel panel-primary">
+                <h3 class="panel-heading panel-title"> Data Sets  </h3>
+                <div class="panel-body">
+                    <table class="table table-striped table-condensed">
+                        <thead>
+                        <tr><td> Id</td> <td>Name</td> <td></td></tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="x in M.dataSets"
+                            ng-click="M.selDS = x"
+                            ng-class="(x==M.selDS ? 'success' : 'default')"
+                            class="clickable"
+                        >
+                            <td> {{ x.datasetid }}</td>
+                            <td> {{ x.name }}</td>
+                            <td> <span class="glyphicon glyphicon-trash"
+                                       aria-hidden="true" ng-click="delDataSet(x)"></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <p>
+                        <button class="btn btn-primary" title="Zapisz wszystko"
+                                ng-click="saveAll()"> Save </button>
+                        <button type="button" class="btn btn-info"
+                                ng-click="M.nDS=!M.nDS; M.nFile=''">New</button>
+                    </p>
+                    <p ng-if="M.nDS">
+                        Filename: <input ng-model="M.editDS" style="width: 30%;">
+                        <button class="btn btn-primary" ng-click="savenDataSet(M.editDS); M.nDS=!M.nDS">OK</button>
+                        <button class="btn btn-default" ng-click="M.nDS=!M.nDS">Cancel</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- MIDDLE -->
+        <div class="col-md-3">
+
+
+
+            <!--/////////////////////////////////////////////////////////////-->
+            <!--// DATA                                                      -->
+            <!--/////////////////////////////////////////////////////////////-->
+            <div class="panel panel-primary">
+                <h3 class="panel-heading panel-title"> Data Instances  </h3>
+                <div class="panel-body">
+                    <table class="table table-striped table-condensed">
+                        <thead>
+                        <tr>
+                            <td> Id</td> <td>Name</td> <td></td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="x in M.data"
+                            ng-class="(x.isSelected ? 'success' : 'default')"
+                            ng-click="x.isSelected = !x.isSelected"
+                            class="clickable"
+                        >
+                            <td> {{ x.dataid }}</td>
+                            <td> {{ x.filename }}</td>
+                            <td> <span class="glyphicon glyphicon-trash"
+                                       ng-click="delData(x)"></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <p>
+                        <button class="btn btn-primary" title="Save current selection"
+                                ng-click="saveAssigned()"> Save</button>
+                        <button class="btn btn-default" title="Reload saved selection"
+                                ng-click="loadAssigned()"> Reload</button>
+                        <button class="btn btn-info" title="Upload new data"
+                                ng-click="M.nDataBox=!M.nDataBox; M.nData=''"> Upload</button>
+                    </p>
+
+                    <div class="boxed" ng-if="M.nDataBox">
+                        Name:
+                        <input ng-model="M.nData" style="width:40%">
+                        <input type="file" id="fileDataUp" name="file"/>
+                        <button class="btn btn-primary" ng-click="uploadData()">Upload!</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!--/////////////////////////////////////////////////////////////-->
+        <!--// RESULT                                                      -->
+        <!--/////////////////////////////////////////////////////////////-->
+        <div class="col-md-6 ">
+            <div class="panel panel-primary">
+                <h3 class="panel-heading panel-title"> Results  </h3>
+                <div class="panel-body">
+
+                    <table class="table table-striped table-condensed table-bordered">
+                        <thead>
+                        <tr class="clickable" ng-class="'info'">
+                            <td  ng-repeat="e in M.engines" ng-if="e.isSelected">
+                                Engine:{{ e.filename }} <br>
+                                <div class="btn-group">
+                                    <button class="btn btn-default" type="button"
+                                            title="Run engine on selected data"
+                                            ng-click="runEngine(e)">
+                                        <em class="glyphicon glyphicon-play"> </em>
+                                    </button>
+                                    <button class="btn btn-default" type="button"
+                                            title="Delete resutls with errors"
+                                            ng-click="resetResultErrors()">
+                                        <em class="glyphicon glyphicon-erase"> </em>
+                                    </button>
+                                    <button class="btn btn-default" type="button"
+                                            title="Delete all results"
+                                            ng-click="deleteEngineResults(e)">
+                                        <em class="glyphicon glyphicon-trash"> </em>
+                                    </button>
+                                    <button class="btn btn-default" type="button"
+                                            title="Use as reference result"
+                                            ng-click="M.refEngine=e">
+                                        <em class="glyphicon glyphicon-star-empty"
+                                            ng-class="(M.refEngine==e ? 'glyphicon-star' : 'glyphicon-star-empty')"
+                                        > </em>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="d in M.data" ng-if="d.isSelected">
+                            <td ng-repeat="e in M.engines" ng-if="e.isSelected" style="width: 90px;">
+                                {{ d.filename}} --> {{M.result[e.engineid][d.dataid].value }},
+                                {{M.result[e.engineid][d.dataid].status}}
+                            </td>
+                        </tr>
+
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+
+            <!--------------------------->
+            <!--FILES-->
+            <!--------------------------->
+            <div class="boxed">
+                <button class="btn btn-default" ng-click="M.shFiles=!M.shFiles; getDirFiles()">
+                    Show files</button>
+
+                <p ng-if="M.shFiles">
+                    <span ng-repeat="f in M.dirFiles"> {{f}} <br></span>
+                </p>
+            </div>
+
+
+            <p ng-if="false">
+                selCat:{{M.selCat}}<br>
+                selDS:{{M.selDS}}<br>
+                cats: {{M.cats}} <br>
+                eng:{{M.engines}}<br>
+                DS'es:{{M.dataSets}}<br>
+                data: {{M.data}}
+            </p>
+        </div>
+
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+</body>
+</html> 

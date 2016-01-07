@@ -80,7 +80,7 @@ angular.module('xeditable').directive('editableBstime', ['editableDirectiveFacto
       render: function() {
         this.parent.render.call(this);
 
-        // timepicker can't update model when ng-model set directly to it
+        // timepicker can't update model when ng-model _set directly to it
         // see: https://github.com/angular-ui/bootstrap/issues/1141
         // so we wrap it into DIV
         var div = angular.element('<div class="well well-small" style="display:inline-block;"></div>');
@@ -317,7 +317,7 @@ angular.module('xeditable').factory('editableController',
 
     /**
      * Whether to show ok/cancel buttons. Values: `right|no`.
-     * If set to `no` control automatically submitted when value changed.  
+     * If _set to `no` control automatically submitted when value changed.
      * If control is part of form buttons will never be shown. 
      * 
      * @var {string|attribute} buttons
@@ -492,7 +492,7 @@ angular.module('xeditable').factory('editableController',
         // workaround for attributes without value (e.g. `multiple = "multiple"`)
         var attrValue = ($attrs[k] === '') ? transferAttr : $attrs[k];
 
-        // set attributes to input
+        // _set attributes to input
         self.inputEl.attr(transferAttr, attrValue);
       }
 
@@ -526,7 +526,7 @@ angular.module('xeditable').factory('editableController',
 
     //show
     self.show = function() {
-      // set value of scope.$data
+      // _set value of scope.$data
       self.setLocalValue();
 
       /*
@@ -668,7 +668,7 @@ angular.module('xeditable').factory('editableController',
       } else if (noPromise && angular.isObject(result) && result.status &&
         (result.status !== 200) && result.data && angular.isString(result.data)) {
         this.setError(result.data);
-        //set result to string: to let form know that there was error
+        //_set result to string: to let form know that there was error
         result = result.data;
       } else if (angular.isString(result)) {
         this.setError(result);
@@ -1041,7 +1041,7 @@ angular.module('xeditable').factory('editableFormController',
 
     $setWaiting: function(value) {
       this.$waiting = !!value;
-      // we can't just set $waiting variable and use it via ng-disabled in children
+      // we can't just _set $waiting variable and use it via ng-disabled in children
       // because in editable-row form is not accessible
       angular.forEach(this.$editables, function(editable) {
         editable.setWaiting(!!value);

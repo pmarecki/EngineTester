@@ -63,10 +63,10 @@
     };
 
     /**
-     * Allow to set global options during configuration
+     * Allow to _set global options during configuration
      */
     this.setOptions = function (type, customOptions) {
-      // If no type was specified set option for the global object
+      // If no type was specified _set option for the global object
       if (! customOptions) {
         customOptions = type;
         options = angular.extend(options, customOptions);
