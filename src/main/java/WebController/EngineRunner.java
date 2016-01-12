@@ -3,9 +3,12 @@ package WebController;
 import Domain.*;
 import Proto.ETO;
 import ViewJson.ViewValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.ServletContext;
@@ -26,11 +29,15 @@ import java.util.concurrent.ConcurrentMap;
  * 1) Others ask for results only from this bean
  * 2) Keeps list && logic of running tasks
  * 3) Loads filenames from DB, and updatas DB with results.
- *
  */
 
-@Service
-public class EngineRunner implements InitializingBean {
+
+/**
+ * Bean, as it needs repos
+ */
+
+@Component
+public class EngineRunner {
 
     @Autowired
     ADataRe dataRe;
@@ -40,10 +47,11 @@ public class EngineRunner implements InitializingBean {
     ResultRe resultRe;
     @Autowired
     ThreadPoolTaskExecutor executor;
-    @Autowired
-    ServletContext servletContext;
 
-    private String rootPath;
+    private String rootPath = "";   //set if you want it elsewhere
+
+    private static Logger logger = LoggerFactory.getLogger(EngineRunner.class);
+
 
     /**
      * Maps controlling execution:
@@ -55,9 +63,11 @@ public class EngineRunner implements InitializingBean {
     Map<TaskKey, Integer> nextReload = new HashMap<>();
     ConcurrentMap<TaskKey, String> taskStatus = new ConcurrentHashMap<>();
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        rootPath = servletContext.getRealPath("Files") + "/";
+
+    //////////////////////
+    // Set the path
+    public void setRootPath(String rootPath) {
+        this.rootPath = rootPath;
     }
 
 
@@ -77,6 +87,7 @@ public class EngineRunner implements InitializingBean {
      */
     public ViewValue getResult(Integer engineid, Integer dataid) {
         Result res = resultRe.findByEngineidAndDataid(engineid, dataid);
+        logger.info("Result asked for engineid=" + engineid + " dataid=" + dataid);
 
         if (res!=null) return getViewValueFromFile(engineid, dataid); //just report to web-client
 
@@ -106,6 +117,7 @@ public class EngineRunner implements InitializingBean {
         }
         return vv;
     }
+
 
     //All !pending results will be eligible for re-run.
     public void cleanErrorStatuses() {
@@ -159,9 +171,12 @@ public class EngineRunner implements InitializingBean {
 
     //Only place where new processes (tasks) are launched (on new therad)
     private void runNewTask(int engineid, int dataid) {
-        //no path in the file names (task needs to prefix them)
-        String e = engineRe.findOne(engineid).getFilename();
-        String d = dataRe.findOne(dataid).getFilename();
+        Engine ee = engineRe.findOne(engineid);
+        AData dd = dataRe.findOne(dataid);
+        if (ee==null || dd==null) return;
+
+        String e = ee.getFilename();
+        String d = dd.getFilename();
         String r = this.getResultFilename(engineid, dataid);
 
         //All tasks update ConcurrentHashMap taskStatus.
@@ -184,7 +199,9 @@ public class EngineRunner implements InitializingBean {
     }
 
 
-    // Reports results using ETO.proto
+    //////////////////////////////////////////////////////////////////////////////////////
+    // ET Output (ETO) Protobuf usage
+    //////////////////////////////////////////////////////////////////////////////////////
     private ViewValue getViewValueFromFile(int engineid, int dataid) {
 
         ViewValue vv = new ViewValue();

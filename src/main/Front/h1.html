@@ -72,9 +72,14 @@
             <!--/////////////////////////////////////////////////////////////-->
             <!--DATASET-->
             <!--/////////////////////////////////////////////////////////////-->
-            <div class="panel panel-primary">
-                <h3 class="panel-heading panel-title"> Data Sets  </h3>
-                <div class="panel-body">
+            <div class="panel panel-primary" >
+                <h3 class="panel-heading panel-title"> Data Sets
+                    <div style="float: right">
+                        <span class="glyphicon" ng-class="(M.showDataSetPanel ? 'glyphicon-chevron-up' : 'glyphicon-chevron-down')"
+                            ng-click="M.showDataSetPanel=!M.showDataSetPanel"></span>
+                    </div>
+                </h3>
+                <div class="panel-body" ng-if="M.showDataSetPanel">
                     <table class="table table-striped table-condensed">
                         <thead>
                         <tr><td> Id</td> <td>Name</td> <td></td></tr>
@@ -105,12 +110,6 @@
                     </p>
                 </div>
             </div>
-        </div>
-
-        <!-- MIDDLE -->
-        <div class="col-md-3">
-
-
 
             <!--/////////////////////////////////////////////////////////////-->
             <!--// DATA                                                      -->
@@ -121,19 +120,20 @@
                     <table class="table table-striped table-condensed">
                         <thead>
                         <tr>
-                            <td> Id</td> <td>Name</td> <td></td>
+                            <td style="width: 10%;"> Id</td> <td style="width: 70%">Name</td> <td></td>
                         </tr>
                         </thead>
                         <tbody>
                         <tr ng-repeat="x in M.data"
                             ng-class="(x.isSelected ? 'success' : 'default')"
-                            ng-click="x.isSelected = !x.isSelected"
-                            class="clickable"
                         >
                             <td> {{ x.dataid }}</td>
-                            <td> {{ x.filename }}</td>
+                            <td  class="clickable" ng-click="x.isSelected = !x.isSelected"> {{ x.filename }}</td>
                             <td> <span class="glyphicon glyphicon-trash"
-                                       ng-click="delData(x)"></span></td>
+                                       ng-click="delData(x)"></span>
+                                 <span class="glyphicon glyphicon-edit"
+                                       ng-click="(M.editDataFile ? M.editDataFile=false : editData(x))"></span>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
@@ -155,13 +155,18 @@
                 </div>
             </div>
 
+
         </div>
+
+
+
+
 
 
         <!--/////////////////////////////////////////////////////////////-->
         <!--// RESULT                                                      -->
         <!--/////////////////////////////////////////////////////////////-->
-        <div class="col-md-6 ">
+        <div class="col-md-9 ">
             <div class="panel panel-primary">
                 <h3 class="panel-heading panel-title"> Results  </h3>
                 <div class="panel-body">
@@ -169,8 +174,9 @@
                     <table class="table table-striped table-condensed table-bordered">
                         <thead>
                         <tr class="clickable" ng-class="'info'">
+                            <td> Data</td>
                             <td  ng-repeat="e in M.engines" ng-if="e.isSelected">
-                                Engine:{{ e.filename }} <br>
+                                {{ e.filename }} <br>
                                 <div class="btn-group">
                                     <button class="btn btn-default" type="button"
                                             title="Run engine on selected data"
@@ -199,10 +205,16 @@
                         </tr>
                         </thead>
                         <tbody>
+
                         <tr ng-repeat="d in M.data" ng-if="d.isSelected">
-                            <td ng-repeat="e in M.engines" ng-if="e.isSelected" style="width: 90px;">
-                                {{ d.filename}} --> {{M.result[e.engineid][d.dataid].value }},
-                                {{M.result[e.engineid][d.dataid].status}}
+                            <td style="width: 50px;"> {{ d.filename }}
+                            <span style="float:right" class="glyphicon glyphicon-edit"
+                                  ng-click="(M.editDataFile ? M.editDataFile=false : editData(d))"></span>
+                            </td>
+                            <td ng-repeat="e in M.engines" ng-if="e.isSelected" style="width: 90px"
+                                title="{{M.result[e.engineid][d.dataid].status}}">
+                                {{M.result[e.engineid][d.dataid].value.toFixed(4) }}
+                                [{{M.result[e.engineid][d.dataid].timems}} ms]
                             </td>
                         </tr>
 
@@ -218,12 +230,20 @@
             <div class="boxed">
                 <button class="btn btn-default" ng-click="M.shFiles=!M.shFiles; getDirFiles()">
                     Show files</button>
-
                 <p ng-if="M.shFiles">
                     <span ng-repeat="f in M.dirFiles"> {{f}} <br></span>
                 </p>
             </div>
+            <!--------------------------->
+            <!--EDIT-->
+            <!--------------------------->
+            <div class="boxed" ng-if="M.editDataFile">
+                <textarea rows="20" cols="50" ng-model="M.editedDataContent">
+                </textarea><br>
+                <button class="btn btn-primary" ng-click="writeDataFile()"> Save </button>
+                <button class="btn btn-default" ng-click="M.editDataFile=!M.editDataFile"> Cancel </button>
 
+            </div>
 
             <p ng-if="false">
                 selCat:{{M.selCat}}<br>
@@ -233,6 +253,8 @@
                 DS'es:{{M.dataSets}}<br>
                 data: {{M.data}}
             </p>
+
+
         </div>
 
 

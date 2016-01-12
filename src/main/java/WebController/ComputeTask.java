@@ -34,8 +34,9 @@ class ComputeTask implements Runnable {
     @Override
     public void run() {
         //Do work; results will be saved in `resultFile` by the engine
+        //Hard coded time limit on 15s
         try {
-            Process tr = Runtime.getRuntime().exec( new String[]{
+            Process tr = Runtime.getRuntime().exec( new String[]{"timeout","15",
                     rootPath + engineFile,
                     rootPath + dataFile,
                     rootPath + resultFile} );

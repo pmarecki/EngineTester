@@ -293,6 +293,30 @@ myapp.controller('enginetest', function ($scope, $http, $interval) {
         );
     };
 
+
+    $scope.editData = function (data) {
+        var dataid = data.dataid;
+        var url = $scope.M.dataSource + 'data/readfile?dataid=' + dataid;
+        $scope.M.editDataFile = true;
+        $scope.M.editedDataInstance = data;
+        $http.get(url).success(
+            function (res) {
+                $scope.M.editedDataContent = res.result;
+            }
+        );
+    };
+
+    $scope.writeDataFile = function () {
+        var content = encodeURIComponent($scope.M.editedDataContent);
+        console.log(content);
+        var dataid = $scope.M.editedDataInstance.dataid;
+        var url = $scope.M.dataSource + 'data/writefile?dataid=' + dataid + '&content='+content;
+        $scope.M.editDataFile = false;
+        $http.post(url);
+    };
+
+
+
     /**
      * Upload
      */
@@ -317,6 +341,11 @@ myapp.controller('enginetest', function ($scope, $http, $interval) {
         $scope.uploadFile(f, $scope.M.nData);
         $scope.savenData($scope.M.nData);
     };
+
+
+
+    /////////////////////////////////////////////////////////////////////
+
 
 
 

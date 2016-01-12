@@ -28,7 +28,7 @@ public class Utils {
     @Deprecated
     public static String removeFile(String filename) {
         try {
-            //way to execute wildcards in java exec
+            //way to run with *'s
             Process tr = Runtime.getRuntime().exec(new String[]{"sh", "-c", "rm " + filename});
         } catch (Exception e) {
             return e.toString();

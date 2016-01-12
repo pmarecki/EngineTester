@@ -2,6 +2,9 @@ package WebController;
 
 import Domain.*;
 import ViewJson.ViewValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,13 +15,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.servlet.ServletContext;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.*;
 
 @Controller
 @EnableWebMvc
-public class MainRest {
+public class MainRest implements InitializingBean {
     @Autowired
     CategoryRe categoryRe;
     @Autowired
@@ -37,11 +38,18 @@ public class MainRest {
     @Autowired
     ServletContext servletContext;
 
+    String rootPath = "";
+
+    private static Logger logger = LoggerFactory.getLogger(MainRest.class);
 
 
-    /**
-     *  CATEGORIES
-     */
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        rootPath = servletContext.getRealPath("Files") + "/";
+        engineRunner.setRootPath(rootPath);
+    }
+
+    ///////////// CATEGORIES
 
     @RequestMapping(value = {"/cat/list"})
     @ResponseBody
@@ -83,7 +91,7 @@ public class MainRest {
         return new Rest();
     }
 
-    ////// DATASETS
+    ///////////// DATASETS
     @RequestMapping(value = {"/dataset/list"})
     @ResponseBody
     public Rest getDatasetList(@RequestParam(value = "catid", defaultValue = "-1") Integer catid)
@@ -106,7 +114,7 @@ public class MainRest {
     }
 
 
-    ////// DATA
+    ///////////// DATA
     @RequestMapping(value = {"/data/list"})
     @ResponseBody
     public Rest getDataList(@RequestParam(value = "catid") Integer catid) {
@@ -115,7 +123,7 @@ public class MainRest {
         return resp;
     }
 
-    @RequestMapping(value = {"/data/add"})  //not tested
+    @RequestMapping(value = {"/data/add"})
     @ResponseBody
     public Rest addData(@RequestParam(value="catid") Integer catid,
                         @RequestParam(value = "filename") String filename) {
@@ -128,7 +136,59 @@ public class MainRest {
     }
 
 
-    //////  ASSIGNMENTS  (data <--> dataset)
+
+    @RequestMapping(value = {"/data/writefile"})
+    @ResponseBody
+    public Rest writeFromString(@RequestParam(value = "dataid") Integer dataid,
+                             @RequestParam(value = "content") String content) {
+        AData data = dataRe.findOne(dataid);
+        if (data==null) return new Rest("No such dataid");
+
+        String fileName = this.rootPath + data.getFilename();
+
+        try {
+            FileWriter fw = new FileWriter(fileName);
+            fw.write(content);
+            fw.flush();
+            fw.close();
+        } catch (Exception e) {
+            return new Rest("Writing file " + data.getFilename() + " failed");
+        }
+        return new Rest();
+
+    }
+
+
+    @RequestMapping(value = {"/data/readfile"})
+    @ResponseBody
+    public Rest readAsString(@RequestParam(value = "dataid") Integer dataid) {
+        AData data = dataRe.findOne(dataid);
+        if (data==null) return new Rest("No such dataid");
+        StringBuilder b = new StringBuilder();
+        String fileName = this.rootPath + data.getFilename();
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(fileName));
+            while(true) {
+                String s = reader.readLine();
+                if (s==null) break;
+                b.append(s + "\n");
+            }
+        } catch (Exception e) {
+            return new Rest("Reading file " + data.getFilename() + "failed");
+        }
+        Rest ans = new Rest();
+        ans.setResult(b.toString());
+
+        return ans;
+
+    }
+
+
+
+
+
+    /////////////  ASSIGNMENTS  (data <--> dataset)
     @RequestMapping(value = {"/assignment/list"})
     @ResponseBody
     public Rest getAssignList(@RequestParam(value = "datasetid") Integer datasetid) {
@@ -175,7 +235,7 @@ public class MainRest {
     }
 
 
-    ////// RESULTS
+    /////////////RESULTS
     @RequestMapping(value = {"/result/get"})
     @ResponseBody
     public Rest getResult(
@@ -284,16 +344,23 @@ public class MainRest {
                         new File(fname)));
                 stream.write(bytes);
                 stream.close();
-                response.setResult("You successfully uploaded " + name + "!");
+                response.setResult("You successfully uploaded " + name + "");
+
             } catch (Exception e) {
                 response.setResult("You failed to upload " + name + " => " + e.getMessage());
             }
         } else {
-            response.setResult("You failed to upload " + name + " because the file was empty.");
+            response.setResult("File was empty.");
         }
+        logger.warn("File uploaded:" + fname);
         //result must be of json type (object); no basic string allowed [else: angular error]
         return response;
     }
+
+
+
+
+    /////////////////////////////////////////////////////////////////////////////
 
 
     ////// PRIVATE
@@ -302,6 +369,8 @@ public class MainRest {
         String mask = "_e" + engineid + "_";
         Utils.deleteFile(path, mask);
     }
+
+
 
 
 }

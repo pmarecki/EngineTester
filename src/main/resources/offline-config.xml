@@ -14,6 +14,8 @@
     <context:annotation-config />
     <context:component-scan base-package="Offline"/>
 
+    <!--Extra beans from other packages-->
+    <bean id="offExecutor" class="WebController.EngineRunner"></bean>
 
     <!-- Tworzy Beany dla interfejsów typu CrudRepository -->
     <jpa:repositories base-package="Domain"
@@ -30,6 +32,18 @@
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
         <property name="entityManagerFactory" ref="entityManagerFactory0" />
     </bean>
+    <!--http://www.baeldung.com/2011/12/26/transaction-configuration-with-jpa-and-spring-3-1/-->
+
+
+    <!--Multithreading-->
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="8" />
+        <property name="maxPoolSize" value="16" />
+        <property name="queueCapacity" value="125"/>
+        <property name="waitForTasksToCompleteOnShutdown" value="true"/>
+        <property name="awaitTerminationSeconds" value="2"/>
+    </bean>
+
 
 
 </beans>
