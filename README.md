@@ -7,3 +7,5 @@ Problem:
 - engines need to be tested
 - some previous (or slow) engines provide reference results
 - whole structure moves forward as work on engines progresses, and data evolve
+
+Elementary front end (AngularJS-ized) in `/src/main/Front`
